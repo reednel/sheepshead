@@ -48,16 +48,16 @@ export function initializeWebSocket(server: HttpServer) {
     }
   }).on("connection", function (socket: any) {
     // Connection now authenticated
-    console.log("Authenticated user socket connected!"); // DEBUG
-    const userId = socket.decoded.sub;
+    const userID = socket.decoded.sub;
+    console.log(`Authenticated user (${userID}) socket connected!`); // DEBUG
 
     // Store the mapping in Redis
-    mapToUserSocket(userId, socket.id);
+    mapToUserSocket(userID, socket.id);
 
     registerGameHandlers(io!, socket);
 
     socket.on("disconnect", () => {
-      unmapToUserSocket(userId);
+      unmapToUserSocket(userID);
     });
   });
 }
