@@ -58,13 +58,18 @@ export async function getHouse(house_id: number): Promise<HouseData> {
 }
 
 /**
- * Add a user to a house in Redis.
+ * Add a user to a house in Redis, at the specified position.
  * @param {number} house_id
  * @param {number} user_id
+ * @param {number} seat
  * @returns {Promise<void>}
  * @throws {Error} Throws an error for database issues, invalid input, etc.
  */
-export async function addUserToHouse(house_id: number, user_id: number) {
+export async function addUserToHouse(
+  house_id: number,
+  user_id: number,
+  seat: number
+) {
   try {
     const houseKey = `house:${house_id}`;
     const house = await getHouse(house_id);
@@ -82,11 +87,9 @@ export async function addUserToHouse(house_id: number, user_id: number) {
     // Check if the user is allowed to join the house
     // TODO: implement this check
 
-    // Add user to the house in the cache, in a random position
-    const randomIndex = Math.floor(
-      Math.random() * (house.player_ids.length + 1)
-    );
-    house.player_ids.splice(randomIndex, 0, user_id);
+    // Add user to the house in the cache, in a random seat
+    const seatIndex = seat % (house.player_ids.length + 1);
+    house.player_ids.splice(seatIndex, 0, user_id);
 
     await redisClient.set(houseKey, JSON.stringify(house));
   } catch (error) {

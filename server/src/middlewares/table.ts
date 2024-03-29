@@ -1,6 +1,6 @@
-import { randomBytes } from "crypto";
 import { cards } from "@prisma/client";
 import { HouseData, PlayerData } from "../types/redis.types";
+import { randInt } from "./utils";
 
 /**
  * Shuffle the deck of cards, with cryptographically secure randomness.
@@ -11,7 +11,7 @@ export function shuffle(deck: cards[]): cards[] {
   let randomIndex = 0;
 
   while (currentIndex !== 0) {
-    randomIndex = parseInt(randomBytes(4).toString("hex"), 16) % currentIndex;
+    randomIndex = randInt() % currentIndex;
     currentIndex--;
     [deck[currentIndex], deck[randomIndex]] = [
       deck[randomIndex],

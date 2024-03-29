@@ -2,6 +2,7 @@ import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 import { HouseData } from "../types/redis.types";
 import { initHand } from "../middlewares/gamemodes";
+import { randInt } from "../middlewares/utils";
 import {
   addUserToHouse,
   createHand,
@@ -54,7 +55,7 @@ export async function joinHouse(req: SessionRequest, res: Response) {
   try {
     const house_id = Number(req.params.house_id);
     const user_id = Number(req.session!.getUserId());
-    await addUserToHouse(house_id, user_id);
+    await addUserToHouse(house_id, user_id, randInt());
     res.json({ success: true, message: "Joined house" });
     // const socket = getUserSocket(user_id);
     // socket.emit('joinRoom', houseKey); // houseKey is like `house:123`
