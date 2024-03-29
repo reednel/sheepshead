@@ -11,6 +11,6 @@ router.post(
   verifySession(),
   gameController.leaveHouse
 );
-router.post("/start-game", verifySession(), gameController.startGame);
+router.post("/start-hand", verifySession(), gameController.startHand);
 
 export default router;

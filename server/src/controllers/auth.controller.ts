@@ -5,41 +5,13 @@ import { deleteUser as deleteAuthUser } from "supertokens-node";
 import EmailPassword from "supertokens-node/recipe/emailpassword";
 import EmailVerification from "supertokens-node/recipe/emailverification";
 import { SessionRequest } from "supertokens-node/framework/express";
-import { prisma } from "../utils/prisma";
-import { users } from "@prisma/client";
-import { isValidEmail, isValidUsername } from "../utils/validation";
+import { isValidEmail } from "../middlewares/validation";
 import {
   getUserByEmail,
-  getUserByUsername,
   isBannedEmail,
-} from "./user.controller";
-
-/**
- * Create users record and user_configs record with all default values
- * @param username
- * @param email
- * @returns {Promise<users|null>}
- */
-export async function createUser(
-  username: string,
-  email: string
-): Promise<users | null> {
-  try {
-    let user = null;
-    await prisma.$transaction(async (prisma: any) => {
-      user = await prisma.users.create({
-        data: { username: username, email: email },
-      });
-      await prisma.user_configs.create({
-        data: { user_id: user.user_id },
-      });
-    });
-    return user;
-  } catch (error) {
-    console.error("Error creating user:", error);
-    throw error;
-  }
-}
+  updateUserEmail,
+  deleteUserRecord,
+} from "../stores/user.stores";
 
 /**
  * Delete user record
@@ -51,39 +23,10 @@ export async function createUser(
  * @throws {Error} Throws an error for database issues, invalid input, etc.
  */
 export async function deleteUser(req: SessionRequest, res: Response) {
-  const username = req.body.username;
-
-  if (!isValidUsername(username)) {
-    res.status(400).json({ message: "Invalid username" });
-    return;
-  }
-
-  let user: users | null;
-
+  const userID = req.body.userID;
   try {
-    user = await getUserByUsername(username);
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    res.status(500).json({ message: "Internal server error" });
-    return;
-  }
-
-  if (!user) {
-    res
-      .status(404)
-      .json({ message: `User not found for username: ${username}` });
-    return;
-  }
-
-  try {
-    await prisma.$transaction(async (prisma: any) => {
-      await prisma.users.delete({
-        where: { user_id: user!.user_id },
-      });
-
-      await deleteAuthUser(user!.user_id.toString());
-    });
-
+    await deleteUserRecord(userID);
+    await deleteAuthUser(userID);
     res.json({ message: "User deleted" });
   } catch (error) {
     console.error(`Error deleting user:`, error);
@@ -101,6 +44,7 @@ export async function deleteUser(req: SessionRequest, res: Response) {
 export async function changeEmail(req: SessionRequest, res: Response) {
   let session = req.session!;
   let email = req.body.email;
+  let userID = Number(session.getUserId());
 
   // Validate the input email
   if (!isValidEmail(email)) {
@@ -138,17 +82,10 @@ export async function changeEmail(req: SessionRequest, res: Response) {
   }
 
   try {
-    await prisma.$transaction(async (prisma: any) => {
-      // Update email in app db
-      await prisma.users.update({
-        where: { user_id: Number(session.getUserId()) },
-        data: { email: email },
-      });
-      // Update email in auth db
-      await EmailPassword.updateEmailOrPassword({
-        recipeUserId: session.getRecipeUserId(),
-        email: email,
-      });
+    await updateUserEmail(userID, email);
+    await EmailPassword.updateEmailOrPassword({
+      recipeUserId: session.getRecipeUserId(),
+      email: email,
     });
     return res.status(200).send("Email updated");
   } catch (error) {

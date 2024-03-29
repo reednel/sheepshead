@@ -1,5 +1,5 @@
 import { cards } from "@prisma/client";
-import { getDeck, shuffle, dealPlayers, dealBlind, seatPlayers } from "./table";
+import { shuffle, dealPlayers, dealBlind, seatPlayers } from "./table";
 import { HandData, HouseData, PlayerData } from "../types/redis.types";
 
 // enum gamemodes {
@@ -25,10 +25,11 @@ import { HandData, HouseData, PlayerData } from "../types/redis.types";
 
 export async function initHand(
   house: HouseData,
+  deck: cards[],
   dealerIndex: number
 ): Promise<HandData> {
   try {
-    const gamemode = house.houseRecord.gamemode;
+    const gamemode = house.gamemode;
     switch (gamemode) {
       // case "G_2H_4P":
       //   return await init2H4P(house, dealerIndex);
@@ -47,7 +48,7 @@ export async function initHand(
       // case "G_4H_7E_4B_PA":
       //   return await init4H7E_4B_PA(house, dealerIndex);
       case "G_5H_CA":
-        return await init5H_CA(house, dealerIndex);
+        return await init5H_CA(house, deck, dealerIndex);
       // case "G_5H_JD":
       //   return await init5H_JD(house, dealerIndex);
       // case "G_6H_5E_DS":
@@ -80,16 +81,18 @@ export async function initHand(
 /**
  * Initialize a hand of Sheepshead.
  * Mode: 5 handed, called ace.
- * @param house
- * @param dealerIndex
+ * @param {HouseData} house
+ * @param {cards[]} deck
+ * @param {number} dealerIndex
  * @returns {Promise<HandData>}
  * @throws {Error} Throws an error for database issues, invalid input, etc.
  */
 async function init5H_CA(
   house: HouseData,
+  newDeck: cards[],
   dealerIndex: number
 ): Promise<HandData> {
-  let deck: cards[] = shuffle(await getDeck());
+  let deck: cards[] = shuffle(newDeck);
   let players: PlayerData[] = seatPlayers(house, dealerIndex);
   let blind: cards[] = [];
 
@@ -98,10 +101,14 @@ async function init5H_CA(
   [players, deck] = dealPlayers(deck, players, 3);
 
   const handData: HandData = {
-    house_id: house.houseRecord.house_id,
+    house_id: house.house_id,
     players: players,
     blind: blind,
     tricks: [],
+    leaster: null,
+    called_ace: null,
+    opposition_win: null,
+    winning_score: null,
   };
 
   return handData;

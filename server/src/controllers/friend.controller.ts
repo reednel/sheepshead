@@ -1,13 +1,19 @@
 import { Request, Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
-import { prisma } from "../utils/prisma";
-import { getUserByUsername } from "./user.controller";
+import { prisma } from "../setups/prisma";
+import { getUserByUsername } from "../stores/user.stores";
+import { isValidUsername } from "../middlewares/validation";
 
 // Send a friend request
 // Creates a friend request record
 export async function sendFriendRequest(req: SessionRequest, res: Response) {
   // Get user record for the requesting user
   const { from_username } = req.params;
+
+  if (!isValidUsername(from_username)) {
+    throw new Error("Invalid username input");
+  }
+
   const from_user = await getUserByUsername(from_username);
   if (!from_user) {
     res.status(404).json({ message: `User not found: ${from_username}` });

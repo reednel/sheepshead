@@ -1,33 +1,6 @@
 import { randomBytes } from "crypto";
-import { cards, players } from "@prisma/client";
-import { prisma } from "./prisma";
-import { redisClient } from "./redis";
-import { HandData, HouseData, PlayerData } from "../types/redis.types";
-
-/**
- * Get the current deck of cards.
- * Fetch it from app-db if it doesn't exist in the cache.
- * @returns {Promise<cards[]>}
- * @throws {Error} Throws an error for database issues, invalid input, etc.
- */
-export async function getDeck(): Promise<cards[]> {
-  try {
-    const deckData = await redisClient.get("deck");
-
-    if (deckData) {
-      const deck: cards[] = JSON.parse(deckData as string);
-      return deck;
-    }
-
-    const deck = await prisma.cards.findMany();
-    await redisClient.set("deck", JSON.stringify(deck));
-
-    return deck;
-  } catch (error) {
-    console.error("Error in getDeck:", error);
-    throw new Error("Internal Server Error");
-  }
-}
+import { cards } from "@prisma/client";
+import { HouseData, PlayerData } from "../types/redis.types";
 
 /**
  * Shuffle the deck of cards, with cryptographically secure randomness.

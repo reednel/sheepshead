@@ -1,7 +1,15 @@
-import { houses, hand_roles, cards } from "@prisma/client";
+import { gamemodes, hand_roles, cards, user_groups } from "@prisma/client";
 
 export interface HouseData {
-  houseRecord: houses;
+  house_id: number;
+  host_id: number;
+  gamemode: gamemodes;
+  player_count: number;
+  leaster_legal: boolean | null;
+  double: boolean;
+  chat_enabled: boolean;
+  players_permitted: user_groups;
+  spectators_permitted: user_groups;
   player_ids: number[];
 }
 
@@ -10,6 +18,10 @@ export interface HandData {
   players: PlayerData[];
   blind: cards[] | null;
   tricks: TrickData[];
+  leaster: boolean | null;
+  called_ace: cards | null;
+  opposition_win: boolean | null;
+  winning_score: number | null;
 }
 
 export interface PlayerData {

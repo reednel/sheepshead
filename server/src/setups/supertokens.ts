@@ -5,17 +5,17 @@ import EmailPassword from "supertokens-node/recipe/emailpassword";
 import EmailVerification from "supertokens-node/recipe/emailverification";
 import Session from "supertokens-node/recipe/session";
 import { RecipeUserId } from "supertokens-node";
-import { createUser } from "../controllers/auth.controller";
+import { createUserRecord } from "../stores/user.stores";
 import {
   getUserByEmail,
   getUserByUsername,
   isBannedEmail,
-} from "../controllers/user.controller";
+} from "../stores/user.stores";
 import {
   isValidEmail,
   isValidPassword,
   isValidUsername,
-} from "../utils/validation";
+} from "../middlewares/validation";
 
 dotenv.config();
 
@@ -98,7 +98,10 @@ SuperTokens.init({
                 const app_username = input.userContext.username;
                 const app_email = response.user.emails[0];
 
-                const app_user = await createUser(app_username, app_email);
+                const app_user = await createUserRecord(
+                  app_username,
+                  app_email
+                );
 
                 // Map auth user_id to app user_id
                 const app_user_id = app_user!.user_id.toString();
