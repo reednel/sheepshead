@@ -2,7 +2,7 @@ import { Server as HttpServer } from "http";
 import { Server } from "socket.io";
 import jwt, { JwtHeader, SigningKeyCallback } from "jsonwebtoken";
 import jwksClient from "jwks-rsa";
-import { redisClient } from "./redis";
+import { mapToUserSocket, unmapToUserSocket } from "../stores/socket.stores";
 import registerGameHandlers from "../handlers/game.handlers";
 import {
   ClientToServerEvents,
@@ -11,22 +11,8 @@ import {
   SocketData,
 } from "../types/socket.types";
 
-let io: Server<
-  ClientToServerEvents,
-  ServerToClientEvents,
-  InterServerEvents,
-  SocketData
-> | null = null;
-
-export function initializeWebSocket(
-  server: HttpServer
-): Server<
-  ClientToServerEvents,
-  ServerToClientEvents,
-  InterServerEvents,
-  SocketData
-> {
-  io = new Server<
+export function initializeWebSocket(server: HttpServer) {
+  let io = new Server<
     ClientToServerEvents,
     ServerToClientEvents,
     InterServerEvents,
@@ -66,29 +52,12 @@ export function initializeWebSocket(
     const userId = socket.decoded.sub;
 
     // Store the mapping in Redis
-    redisClient.set(`userSocket:${userId}`, socket.id);
+    mapToUserSocket(userId, socket.id);
 
     registerGameHandlers(io!, socket);
 
     socket.on("disconnect", () => {
-      redisClient.del(`userSocket:${userId}`);
+      unmapToUserSocket(userId);
     });
   });
-
-  return io;
-}
-
-// Function to retrieve a user's socket
-// POSSIBLY UNUSED! IN WHICH CASE DELETE AND RM IO AS GLOBAL
-export async function getUserSocket(userId: number) {
-  try {
-    if (!io) {
-      throw new Error("Socket.io not initialized");
-    }
-    const socketId = await redisClient.get(`userSocket:${userId}`);
-    return socketId ? io.sockets.sockets.get(socketId) : null;
-  } catch (error) {
-    console.error("Error in getUserSocket:", error);
-    return null;
-  }
 }

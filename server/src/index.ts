@@ -9,7 +9,7 @@ import friendRoutes from "./routes/friend.routes";
 import userRoutes from "./routes/user.routes";
 import "./setups/supertokens";
 import { connectRedis, disconnectRedis } from "./setups/redis";
-import { initializeWebSocket } from "./setups/socket";
+import { initializeWebSocket } from "./setups/socketio";
 
 dotenv.config();
 
@@ -35,7 +35,7 @@ app.use(friendRoutes);
 app.use(userRoutes);
 app.use(errorHandler());
 
-const io = initializeWebSocket(server);
+initializeWebSocket(server);
 
 server.listen(4000, () =>
   console.log("Sheepshead Online server ready at: http://localhost:4000")
