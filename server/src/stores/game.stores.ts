@@ -156,11 +156,50 @@ export async function getDeck(): Promise<cards[]> {
 export async function createHand(hand: HandData) {
   try {
     // Create hand record in app-cache
-    const temp_hand_id = redisClient.incr("temp_hand_id");
+    const temp_hand_id = await redisClient.incr("temp_hand_id");
     const handKey = `hand:${temp_hand_id}`;
+    hand.hand_id = temp_hand_id;
     await redisClient.set(handKey, JSON.stringify(hand));
   } catch (error) {
     console.error("Error in createHandRecord:", error);
+    throw new Error("Internal Server Error");
+  }
+}
+
+/**
+ * Get a hand from redis.
+ * @param {number} hand_id
+ * @returns {Promise<HandData>}
+ * @throws {Error} Throws an error for database issues, invalid input, etc.
+ */
+export async function getHand(hand_id: number): Promise<HandData> {
+  try {
+    const handKey = `hand:${hand_id}`;
+    const handData = await redisClient.get(handKey);
+
+    if (!handData) {
+      throw new Error("Hand not found");
+    }
+
+    return JSON.parse(handData as string);
+  } catch (error) {
+    console.error("Error in getHandRecord:", error);
+    throw new Error("Internal Server Error");
+  }
+}
+
+/**
+ * Update a hand in Redis.
+ * @param {HandData} hand
+ * @returns {Promise<void>}
+ * @throws {Error} Throws an error for database issues, invalid input, etc.
+ */
+export async function updateHand(hand: HandData) {
+  try {
+    const handKey = `hand:${hand.hand_id}`;
+    await redisClient.set(handKey, JSON.stringify(hand));
+  } catch (error) {
+    console.error("Error in updateHand:", error);
     throw new Error("Internal Server Error");
   }
 }

@@ -19,7 +19,6 @@ export function initializeWebSocket(server: HttpServer) {
     SocketData
   >(server);
 
-  // Functions to fetch jwks
   var client = jwksClient({
     jwksUri: "http://localhost:4000/auth/jwt/jwks.json",
   });
@@ -51,7 +50,6 @@ export function initializeWebSocket(server: HttpServer) {
     const userID = socket.decoded.sub;
     console.log(`Authenticated user (${userID}) socket connected!`); // DEBUG
 
-    // Store the mapping in Redis
     mapToUserSocket(userID, socket.id);
 
     registerGameHandlers(io!, socket);

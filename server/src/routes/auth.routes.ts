@@ -1,6 +1,6 @@
 import express from "express";
 import { verifySession } from "supertokens-node/recipe/session/framework/express";
-import * as authController from "../controllers/auth.controller";
+import * as authController from "../controllers/auth.controllers";
 
 const router = express.Router();
 

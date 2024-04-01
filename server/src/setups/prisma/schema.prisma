@@ -76,6 +76,7 @@ model players {
   hand_id      Int
   player_index Int        @db.SmallInt
   role         hand_roles
+  passed       Boolean?
 
   hands hands @relation(fields: [hand_id], references: [hand_id], onDelete: NoAction, onUpdate: NoAction)
   users users @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)

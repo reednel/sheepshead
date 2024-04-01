@@ -15,6 +15,7 @@ export interface HouseData {
 
 export interface HandData {
   house_id: number;
+  hand_id: number | null;
   players: PlayerData[];
   blind: cards[] | null;
   tricks: TrickData[];
@@ -27,6 +28,7 @@ export interface HandData {
 export interface PlayerData {
   user_id: number;
   player_index: number;
+  passed: boolean | null;
   role: hand_roles | null;
   hand: cards[] | null;
 }

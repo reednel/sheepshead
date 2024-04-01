@@ -4,7 +4,8 @@ import { createHand, getDeck, getHouse } from "../stores/game.stores";
 
 import { MoveData } from "../types/socket.types";
 
-const registerGameHandlers = (io: Server, socket: Socket) => {
+const registerGameHandlers = (io: Server, socket: any) => {
+  // socket: Socket
   const joinHouse = (houseKey: string) => {
     socket.join(houseKey);
   };
@@ -35,8 +36,16 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
     // send each player their hand
     for (const player of handData.players) {
       const playerHand = player.hand || [];
-      io.to(player.user_id).emit("handStart", playerHand);
+      io.to(`userSocket:${player.user_id}`).emit("handStart", playerHand);
     }
+  };
+
+  const pickOrPass = async (houseID: string) => {
+    const house_id = Number(houseID);
+    const user_id = Number(socket.decoded.sub);
+
+    const house = await getHouse(house_id);
+    // Uhh, stuff
   };
 
   socket.on("playerMove", playerMove);

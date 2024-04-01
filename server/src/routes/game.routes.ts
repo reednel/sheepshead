@@ -1,6 +1,6 @@
 import express from "express";
 import { verifySession } from "supertokens-node/recipe/session/framework/express";
-import * as gameController from "../controllers/game.controller";
+import * as gameController from "../controllers/game.controllers";
 
 const router = express.Router();
 
@@ -11,6 +11,5 @@ router.post(
   verifySession(),
   gameController.leaveHouse
 );
-router.post("/start-hand", verifySession(), gameController.startHand);
 
 export default router;
