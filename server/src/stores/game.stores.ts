@@ -2,6 +2,7 @@ import { prisma } from "../setups/prisma";
 import { cards } from "@prisma/client";
 import { redisClient } from "../setups/redis";
 import { HouseData, HandData, PlayerData } from "../types/redis.types";
+import e from "express";
 
 /**
  * Create a new house record in the database and store it in Redis.
@@ -255,6 +256,22 @@ export async function updatePlayerInHand(
     await updateHand(hand);
   } catch (error) {
     console.error("Error in updatePlayerInHand:", error);
+    throw new Error("Internal Server Error");
+  }
+}
+
+/**
+ * Get the house associated with a hand.
+ * @param {number} hand_id
+ * @returns {Promise<HouseData>}
+ * @throws {Error} Throws an error for database issues, invalid input, etc.
+ */
+export async function getHouseByHandID(hand_id: number): Promise<HouseData> {
+  try {
+    const hand = await getHand(hand_id);
+    return await getHouse(hand.house_id);
+  } catch (error) {
+    console.error("Error in getHouseByHandID:", error);
     throw new Error("Internal Server Error");
   }
 }

@@ -1,6 +1,11 @@
 import { cards } from "@prisma/client";
 import { shuffle, dealPlayers, dealBlind, seatPlayers } from "./table";
-import { HandData, HouseData, PlayerData } from "../types/redis.types";
+import {
+  HandData,
+  HandPhases,
+  HouseData,
+  PlayerData,
+} from "../types/redis.types";
 
 // enum gamemodes {
 //     G_2H_4P // 2 handed, 4 pairs down each, 8 each hand
@@ -105,17 +110,24 @@ function init5H_CA(
     hand_id: null,
     players: players,
     blind: blind,
+    buried: [],
     tricks: [],
     leaster: null,
     called_ace: null,
     opposition_win: null,
     winning_score: null,
+    phase: HandPhases.POP,
+    next_player: 0,
   };
 
   return handData;
 }
 
-function validate5H_CA(hand: HandData, userID: number): boolean {
+function validatePlay5H_CA(
+  hand: HandData,
+  card: cards,
+  userID: number
+): boolean {
   return true;
 }
 

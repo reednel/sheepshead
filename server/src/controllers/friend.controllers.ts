@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 import { prisma } from "../setups/prisma";
 import { getUserByUsername } from "../stores/user.stores";
-import { isValidUsername } from "../middlewares/validation";
+import { isValidUsername } from "../middlewares/typeValidation";
 
 // Send a friend request
 // Creates a friend request record

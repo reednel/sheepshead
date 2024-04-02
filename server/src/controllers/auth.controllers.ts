@@ -5,7 +5,7 @@ import { deleteUser as deleteAuthUser } from "supertokens-node";
 import EmailPassword from "supertokens-node/recipe/emailpassword";
 import EmailVerification from "supertokens-node/recipe/emailverification";
 import { SessionRequest } from "supertokens-node/framework/express";
-import { isValidEmail } from "../middlewares/validation";
+import { isValidEmail } from "../middlewares/typeValidation";
 import {
   getUserByEmail,
   isBannedEmail,

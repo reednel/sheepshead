@@ -15,7 +15,7 @@ import {
   isValidEmail,
   isValidPassword,
   isValidUsername,
-} from "../middlewares/validation";
+} from "../middlewares/typeValidation";
 
 dotenv.config();
 

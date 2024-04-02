@@ -14,8 +14,9 @@ model cards {
   power   Int    @db.SmallInt
   points  Int    @db.SmallInt
 
-  hands hands[]
-  plays plays[]
+  hands  hands[]
+  plays  plays[]
+  blinds blinds[]
 }
 
 model friend_requests {
@@ -69,6 +70,7 @@ model hands {
   cards   cards?    @relation(fields: [called_ace], references: [card_id], onDelete: NoAction, onUpdate: NoAction)
   players players[]
   tricks  tricks[]
+  blinds  blinds[]
 }
 
 model players {
@@ -109,6 +111,16 @@ model plays {
   users  users  @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([hand_id, trick_index, play_index])
+}
+
+model blinds {
+  hand_id Int
+  card_id String @db.Char(2)
+
+  hands hands @relation(fields: [hand_id], references: [hand_id], onDelete: NoAction, onUpdate: NoAction)
+  cards cards @relation(fields: [card_id], references: [card_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([hand_id, card_id])
 }
 
 model user_configs {

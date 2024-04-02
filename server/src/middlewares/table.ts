@@ -62,7 +62,7 @@ export function dealBlind(deck: cards[], numCards: number): [cards[], cards[]] {
 }
 
 /**
- * Seat the players in the house.
+ * Seat the players in the house. The first player is left of the dealer, at index 0.
  * @param {HouseData} house
  * @param {number} dealerIndex
  * @returns {PlayerData[]}
@@ -79,6 +79,7 @@ export function seatPlayers(
     const player: PlayerData = {
       user_id: player_id,
       player_index: i,
+      passed: null,
       role: null,
       hand: null,
     };
