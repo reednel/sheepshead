@@ -40,9 +40,11 @@ const registerGameHandlers = (io: Server, socket: any) => {
     }
   };
 
-  const pickOrPass = async (houseID: string) => {
+  const pickOrPass = async (houseID: string, pick: boolean) => {
     const house_id = Number(houseID);
     const user_id = Number(socket.decoded.sub);
+
+    //
 
     const house = await getHouse(house_id);
     // Uhh, stuff
@@ -51,6 +53,7 @@ const registerGameHandlers = (io: Server, socket: any) => {
   socket.on("playerMove", playerMove);
   socket.on("joinHouse", joinHouse);
   socket.on("startHand", startHand);
+  socket.on("pickOrPass", pickOrPass);
 };
 
 export default registerGameHandlers;

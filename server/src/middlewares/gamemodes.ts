@@ -87,11 +87,11 @@ export async function initHand(
  * @returns {Promise<HandData>}
  * @throws {Error} Throws an error for database issues, invalid input, etc.
  */
-async function init5H_CA(
+function init5H_CA(
   house: HouseData,
   newDeck: cards[],
   dealerIndex: number
-): Promise<HandData> {
+): HandData {
   let deck: cards[] = shuffle(newDeck);
   let players: PlayerData[] = seatPlayers(house, dealerIndex);
   let blind: cards[] = [];
@@ -102,6 +102,7 @@ async function init5H_CA(
 
   const handData: HandData = {
     house_id: house.house_id,
+    hand_id: null,
     players: players,
     blind: blind,
     tricks: [],
@@ -112,6 +113,10 @@ async function init5H_CA(
   };
 
   return handData;
+}
+
+function validate5H_CA(hand: HandData, userID: number): boolean {
+  return true;
 }
 
 // ...

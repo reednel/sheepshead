@@ -1,7 +1,7 @@
 import { prisma } from "../setups/prisma";
 import { cards } from "@prisma/client";
 import { redisClient } from "../setups/redis";
-import { HouseData, HandData } from "../types/redis.types";
+import { HouseData, HandData, PlayerData } from "../types/redis.types";
 
 /**
  * Create a new house record in the database and store it in Redis.
@@ -200,6 +200,61 @@ export async function updateHand(hand: HandData) {
     await redisClient.set(handKey, JSON.stringify(hand));
   } catch (error) {
     console.error("Error in updateHand:", error);
+    throw new Error("Internal Server Error");
+  }
+}
+
+/**
+ * Get a player from a hand in Redis.
+ * @param {number} hand_id
+ * @param {number} user_id
+ * @returns {Promise<PlayerData>}
+ * @throws {Error} Throws an error for database issues, invalid input, etc.
+ */
+export async function getPlayerFromHand(
+  hand_id: number,
+  user_id: number
+): Promise<PlayerData> {
+  try {
+    const hand = await getHand(hand_id);
+    const player = hand.players.find((p) => p.user_id === user_id);
+
+    if (!player) {
+      throw new Error("Player not found in hand");
+    }
+
+    return player;
+  } catch (error) {
+    console.error("Error in getPlayerFromHand:", error);
+    throw new Error("Internal Server Error");
+  }
+}
+
+/**
+ * Update a player in a hand in Redis.
+ * @param {number} hand_id
+ * @param {number} user_id
+ * @param {PlayerData} playerData
+ * @returns {Promise<void>}
+ * @throws {Error} Throws an error for database issues, invalid input, etc.
+ */
+export async function updatePlayerInHand(
+  hand_id: number,
+  user_id: number,
+  playerData: PlayerData
+) {
+  try {
+    const hand = await getHand(hand_id);
+    const player = hand.players.find((p) => p.user_id === user_id);
+
+    if (!player) {
+      throw new Error("Player not found in hand");
+    }
+
+    Object.assign(player, playerData);
+    await updateHand(hand);
+  } catch (error) {
+    console.error("Error in updatePlayerInHand:", error);
     throw new Error("Internal Server Error");
   }
 }
