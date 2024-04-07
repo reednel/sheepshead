@@ -1,4 +1,4 @@
-import { gamemodes, cards, user_groups } from "@prisma/client";
+import { gamemodes, user_groups } from "@prisma/client";
 
 export interface HouseData {
   house_id: number;
@@ -11,17 +11,18 @@ export interface HouseData {
   players_permitted: user_groups;
   spectators_permitted: user_groups;
   player_ids: number[];
+  dealer_index: number;
 }
 
 export interface HandData {
   house_id: number;
   hand_id: number | null;
   players: PlayerData[];
-  blind: cards[] | null;
-  buried: cards[] | null;
+  blind: CardData[] | null;
+  buried: CardData[] | null;
   tricks: TrickData[];
   leaster: boolean | null;
-  called_ace: cards | null;
+  called_ace: CardData | null;
   opposition_win: boolean | null;
   winning_score: number | null;
   phase: HandPhases;
@@ -32,14 +33,22 @@ export interface PlayerData {
   user_id: number;
   player_index: number;
   passed: boolean | null;
-  role: HandRoles | null;
-  hand: cards[] | null;
+  role: PlayerRoles | null;
+  hand: CardData[] | null;
+}
+
+export interface CardData {
+  card_id: string;
+  suit: string;
+  power: number;
+  points: number;
+  playable: boolean | null;
 }
 
 export interface TrickData {
   trick_index: number;
-  winner: number;
-  points_won: number;
+  taker: number;
+  points_taken: number;
   plays: PlayData[];
 }
 
@@ -49,7 +58,7 @@ export interface PlayData {
   card_code: string;
 }
 
-export const enum HandRoles {
+export const enum PlayerRoles {
   PICKER = "PICKER",
   PARTNER = "PARTNER",
   OPPOSITION = "OPPOSITION",
@@ -58,5 +67,6 @@ export const enum HandRoles {
 export const enum HandPhases {
   POP = "POP",
   BURY = "BURY",
+  CALL = "CALL",
   PLAY = "PLAY",
 }

@@ -28,7 +28,7 @@ export async function createHouse(req: SessionRequest, res: Response) {
       });
     }
 
-    createHouseRecord(house);
+    await createHouseRecord(house);
 
     // Set expiration for the Redis key?
     // await redisClient.expire(houseKey, 3600);

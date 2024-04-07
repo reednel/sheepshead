@@ -1,8 +1,11 @@
 import { prisma } from "../setups/prisma";
-import { cards } from "@prisma/client";
 import { redisClient } from "../setups/redis";
-import { HouseData, HandData, PlayerData } from "../types/redis.types";
-import e from "express";
+import {
+  HouseData,
+  HandData,
+  PlayerData,
+  CardData,
+} from "../types/redis.types";
 
 /**
  * Create a new house record in the database and store it in Redis.
@@ -127,10 +130,10 @@ export async function removeUserFromHouse(house_id: number, user_id: number) {
 /**
  * Get the current deck of cards.
  * Fetch it from app-db if it doesn't exist in the cache.
- * @returns {Promise<cards[]>}
+ * @returns {Promise<CardData[]>}
  * @throws {Error} Throws an error for database issues, invalid input, etc.
  */
-export async function getDeck(): Promise<cards[]> {
+export async function getDeck(): Promise<CardData[]> {
   try {
     const deckData = await redisClient.get("deck");
 
@@ -139,9 +142,16 @@ export async function getDeck(): Promise<cards[]> {
     }
 
     const deck = await prisma.cards.findMany();
-    await redisClient.set("deck", JSON.stringify(deck));
+    const playableDeck: CardData[] = deck.map((card) => ({
+      card_id: card.card_id,
+      suit: card.suit,
+      power: card.power,
+      points: card.points,
+      playable: null,
+    }));
+    await redisClient.set("deck", JSON.stringify(playableDeck));
 
-    return deck;
+    return playableDeck;
   } catch (error) {
     console.error("Error in getDeck:", error);
     throw new Error("Internal Server Error");

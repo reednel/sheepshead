@@ -1,10 +1,10 @@
-import { cards } from "@prisma/client";
 import { shuffle, dealPlayers, dealBlind, seatPlayers } from "./table";
 import {
   HandData,
   HandPhases,
   HouseData,
   PlayerData,
+  CardData,
 } from "../types/redis.types";
 
 // enum gamemodes {
@@ -25,58 +25,117 @@ import {
 //     G_7H_4E_LP // 7 handed, 4 each, 4 blind, left of picker is partner
 //     G_7H_DS // 7 handed, G_5H_CA, dealer and left of dealer sit
 //     G_8H_4E_BQP // 8 handed, 4 each, black queens partners
-//     G_8H_4E_FQP // 8 handed, 4 each, first two cleans partners, 7 of diamonds highest trump
+//     G_8H_4E_FQP // 8 handed, 4 each, first two queens partners, 7 of diamonds highest trump
 //   }
 
-export async function initHand(
-  house: HouseData,
-  deck: cards[],
-  dealerIndex: number
-): Promise<HandData> {
+export function initHand(house: HouseData, deck: CardData[]): HandData {
   try {
-    const gamemode = house.gamemode;
-    switch (gamemode) {
+    switch (house.gamemode) {
       // case "G_2H_4P":
-      //   return await init2H4P(house, dealerIndex);
+      //   return await init2H4P(house, deck);
       // case "G_2H_6P":
-      //   return await init2H6P(house, dealerIndex);
+      //   return await init2H6P(house, deck);
       // case "G_3H_10E":
-      //   return await init3H10E(house, dealerIndex);
+      //   return await init3H10E(house, deck);
       // case "G_4H_8E_BQP":
-      //   return await init4H8E_BQP(house, dealerIndex);
+      //   return await init4H8E_BQP(house, deck);
       // case "G_4H_8E_QJP":
-      //   return await init4H8E_QJP(house, dealerIndex);
+      //   return await init4H8E_QJP(house, deck);
       // case "G_4H_8E_FQP":
-      //   return await init4H8E_FQP(house, dealerIndex);
+      //   return await init4H8E_FQP(house, deck);
       // case "G_4H_7E_2B_CA":
-      //   return await init4H7E_2B_CA(house, dealerIndex);
+      //   return await init4H7E_2B_CA(house, deck);
       // case "G_4H_7E_4B_PA":
-      //   return await init4H7E_4B_PA(house, dealerIndex);
+      //   return await init4H7E_4B_PA(house, deck);
       case "G_5H_CA":
-        return await init5H_CA(house, deck, dealerIndex);
+        return init5H_CA(house, deck);
       // case "G_5H_JD":
-      //   return await init5H_JD(house, dealerIndex);
+      //   return await init5H_JD(house, deck);
       // case "G_6H_5E_DS":
-      //   return await init6H5E_DS(house, dealerIndex);
+      //   return await init6H5E_DS(house, deck);
       // case "G_6H_5E_JC":
-      //   return await init6H5E_JC(house, dealerIndex);
+      //   return await init6H5E_JC(house, deck);
       // case "G_7H_4E_JD":
-      //   return await init7H4E_JD(house, dealerIndex);
+      //   return await init7H4E_JD(house, deck);
       // case "G_7H_4E_2P":
-      //   return await init7H4E_2P(house, dealerIndex);
+      //   return await init7H4E_2P(house, deck);
       // case "G_7H_4E_LP":
-      //   return await init7H4E_LP(house, dealerIndex);
+      //   return await init7H4E_LP(house, deck);
       // case "G_7H_DS":
-      //   return await init7H_DS(house, dealerIndex);
+      //   return await init7H_DS(house, deck);
       // case "G_8H_4E_BQP":
-      //   return await init8H4E_BQP(house, dealerIndex);
+      //   return await init8H4E_BQP(house, deck);
       // case "G_8H_4E_FQP":
-      //   return await init8H4E_FQP(house, dealerIndex);
+      //   return await init8H4E_FQP(house, deck);
       default:
         throw new Error("Invalid gamemode");
     }
   } catch (error) {
     console.error("Error in initHand:", error);
+    throw new Error("Internal Server Error");
+  }
+}
+
+export function getNextPhase(
+  gamemode: string,
+  currentPhase: HandPhases
+): HandPhases | null {
+  try {
+    switch (gamemode) {
+      // case "G_2H_4P":
+      //   return getNextPhase2H4P(currentPhase);
+      // case "G_2H_6P":
+      //   return getNextPhase2H6P(currentPhase);
+      // case "G_3H_10E":
+      //   return getNextPhase3H10E(currentPhase);
+      // case "G_4H_8E_BQP":
+      //   return getNextPhase4H8E_BQP(currentPhase);
+      // case "G_4H_8E_QJP":
+      //   return getNextPhase4H8E_QJP(currentPhase);
+      // case "G_4H_8E_FQP":
+      //   return getNextPhase4H8E_FQP(currentPhase);
+      // case "G_4H_7E_2B_CA":
+      //   return getNextPhase4H7E_2B_CA(currentPhase);
+      // case "G_4H_7E_4B_PA":
+      //   return getNextPhase4H7E_4B_PA(currentPhase);
+      case "G_5H_CA":
+        return getNextPhase5H_CA(currentPhase);
+      // case "G_5H_JD":
+      //   return getNextPhase5H_JD(currentPhase);
+      // case "G_6H_5E_DS":
+      //   return getNextPhase6H5E_DS(currentPhase);
+      // case "G_6H_5E_JC":
+      //   return getNextPhase6H5E_JC(currentPhase);
+      // case "G_7H_4E_JD":
+      //   return getNextPhase7H4E_JD(currentPhase);
+      // case "G_7H_4E_2P":
+      //   return getNextPhase7H4E_2P(currentPhase);
+      // case "G_7H_4E_LP":
+      //   return getNextPhase7H4E_LP(currentPhase);
+      // case "G_7H_DS":
+      //   return getNextPhase7H_DS(currentPhase);
+      // case "G_8H_4E_BQP":
+      //   return getNextPhase8H4E_BQP(currentPhase);
+      // case "G_8H_4E_FQP":
+      //   return getNextPhase8H4E_FQP(currentPhase);
+      default:
+        throw new Error("Invalid gamemode");
+    }
+  } catch (error) {
+    console.error("Error in getNextPhase:", error);
+    throw new Error("Internal Server Error");
+  }
+}
+
+export function setCallableCards(
+  hand: CardData[],
+  blind: CardData[]
+): CardData[] {
+  try {
+    // TODO: Implement setCallableCards
+    return hand;
+  } catch (error) {
+    console.error("Error in setCallableCards:", error);
     throw new Error("Internal Server Error");
   }
 }
@@ -87,19 +146,14 @@ export async function initHand(
  * Initialize a hand of Sheepshead.
  * Mode: 5 handed, called ace.
  * @param {HouseData} house
- * @param {cards[]} deck
- * @param {number} dealerIndex
- * @returns {Promise<HandData>}
+ * @param {CardData[]} deck
+ * @returns {HandData}
  * @throws {Error} Throws an error for database issues, invalid input, etc.
  */
-function init5H_CA(
-  house: HouseData,
-  newDeck: cards[],
-  dealerIndex: number
-): HandData {
-  let deck: cards[] = shuffle(newDeck);
-  let players: PlayerData[] = seatPlayers(house, dealerIndex);
-  let blind: cards[] = [];
+function init5H_CA(house: HouseData, newDeck: CardData[]): HandData {
+  let deck: CardData[] = shuffle(newDeck);
+  let players: PlayerData[] = seatPlayers(house);
+  let blind: CardData[] = [];
 
   [players, deck] = dealPlayers(deck, players, 3);
   [blind, deck] = dealBlind(deck, 2);
@@ -123,12 +177,19 @@ function init5H_CA(
   return handData;
 }
 
-function validatePlay5H_CA(
-  hand: HandData,
-  card: cards,
-  userID: number
-): boolean {
-  return true;
+function getNextPhase5H_CA(currentPhase: HandPhases): HandPhases | null {
+  switch (currentPhase) {
+    case HandPhases.POP:
+      return HandPhases.BURY;
+    case HandPhases.BURY:
+      return HandPhases.CALL;
+    case HandPhases.CALL:
+      return HandPhases.PLAY;
+    case HandPhases.PLAY:
+      return null;
+    default:
+      return null;
+  }
 }
 
 // ...

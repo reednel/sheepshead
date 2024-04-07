@@ -76,8 +76,8 @@ model hands {
 model players {
   user_id      Int
   hand_id      Int
-  player_index Int        @db.SmallInt
-  role         hand_roles
+  player_index Int          @db.SmallInt
+  role         player_roles
   passed       Boolean?
 
   hands hands @relation(fields: [hand_id], references: [hand_id], onDelete: NoAction, onUpdate: NoAction)
@@ -184,7 +184,7 @@ enum user_groups {
   EVERYONE
 }
 
-enum hand_roles {
+enum player_roles {
   PICKER
   PARTNER
   OPPOSITION

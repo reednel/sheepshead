@@ -1,12 +1,11 @@
-import { cards } from "@prisma/client";
-import { HouseData, PlayerData } from "../types/redis.types";
+import { HouseData, PlayerData, CardData } from "../types/redis.types";
 import { randInt } from "./utils";
 
 /**
  * Shuffle the deck of cards, with cryptographically secure randomness.
- * @returns {cards[]}
+ * @returns {CardData[]}
  */
-export function shuffle(deck: cards[]): cards[] {
+export function shuffle(deck: CardData[]): CardData[] {
   let currentIndex = deck.length;
   let randomIndex = 0;
 
@@ -24,18 +23,18 @@ export function shuffle(deck: cards[]): cards[] {
 
 /**
  * Deal numCards from the given deck to the given players.
- * @param {cards[]} deck
+ * @param {CardData[]} deck
  * @param {PlayerData[]} players
  * @param {number} numCards
- * @returns {PlayerData[], cards[]} The players with cards dealt, and the updated deck.
+ * @returns {PlayerData[], CardData[]} The players with cards dealt, and the updated deck.
  * @throws {Error} Throws an error for database issues, invalid input, etc.
  */
 export function dealPlayers(
-  deck: cards[],
+  deck: CardData[],
   players: PlayerData[],
   numCards: number
-): [PlayerData[], cards[]] {
-  let remainingDeck: cards[] = deck;
+): [PlayerData[], CardData[]] {
+  let remainingDeck: CardData[] = deck;
   for (let i = 0; i < 5; i++) {
     const dealtCards = deck.slice(0, numCards);
     remainingDeck = deck.slice(numCards);
@@ -49,13 +48,16 @@ export function dealPlayers(
 
 /**
  * Deal numCards from the given deck to the given blind.
- * @param {cards[]} deck
- * @param {cards[]} blind
+ * @param {CardData[]} deck
+ * @param {CardData[]} blind
  * @param {number} numCards
- * @returns {cards[], cards[]} The dealt cards, and the updated deck.
+ * @returns {CardData[], CardData[]} The dealt cards, and the updated deck.
  * @throws {Error} Throws an error for database issues, invalid input, etc.
  */
-export function dealBlind(deck: cards[], numCards: number): [cards[], cards[]] {
+export function dealBlind(
+  deck: CardData[],
+  numCards: number
+): [CardData[], CardData[]] {
   const dealtCards = deck.slice(0, numCards);
   const remainingDeck = deck.slice(numCards);
   return [dealtCards, remainingDeck];
@@ -64,18 +66,15 @@ export function dealBlind(deck: cards[], numCards: number): [cards[], cards[]] {
 /**
  * Seat the players in the house. The first player is left of the dealer, at index 0.
  * @param {HouseData} house
- * @param {number} dealerIndex
  * @returns {PlayerData[]}
  * @throws {Error} Throws an error for database issues, invalid input, etc.
  */
-export function seatPlayers(
-  house: HouseData,
-  dealerIndex: number
-): PlayerData[] {
+export function seatPlayers(house: HouseData): PlayerData[] {
   const players: PlayerData[] = [];
   const playerCount = house.player_ids.length;
+  const firstPlayer = (house.dealer_index + 1) % playerCount;
   for (let i = 0; i < playerCount; i++) {
-    const player_id = house.player_ids[(dealerIndex + 1 + i) % playerCount];
+    const player_id = house.player_ids[(firstPlayer + i) % playerCount];
     const player: PlayerData = {
       user_id: player_id,
       player_index: i,

@@ -1,5 +1,9 @@
 import { Server, Socket } from "socket.io";
-import { initHand } from "../middlewares/gamemodes";
+import {
+  initHand,
+  getNextPhase,
+  setCallableCards,
+} from "../middlewares/gamemodes";
 import {
   createHand,
   getDeck,
@@ -9,7 +13,7 @@ import {
 } from "../stores/game.stores";
 
 import { MoveData } from "../types/socket.types";
-import { HandPhases, HandRoles } from "../types/redis.types";
+import { HandPhases, PlayerRoles, CardData } from "../types/redis.types";
 
 const registerGameHandlers = (io: Server, socket: any) => {
   // socket: Socket
@@ -37,7 +41,7 @@ const registerGameHandlers = (io: Server, socket: any) => {
     }
 
     const deck = await getDeck();
-    const handData = await initHand(house, deck, 0);
+    const handData = await initHand(house, deck);
     await createHand(handData);
 
     // send each player their hand
@@ -71,7 +75,7 @@ const registerGameHandlers = (io: Server, socket: any) => {
       return;
     }
 
-    // verify it's the user's turn
+    // Verify it's the player's turn
     if (player.user_id !== user_id) {
       socket.emit("error", {
         success: false,
@@ -83,7 +87,7 @@ const registerGameHandlers = (io: Server, socket: any) => {
     // Pick or pass
     if (pick) {
       player.passed = false;
-      player.role = HandRoles.PICKER;
+      player.role = PlayerRoles.PICKER;
       player.hand = player.hand!.concat(hand.blind!); // problematic given how we're handling 5+1 or 5+2?
       hand.blind = [];
       hand.players[hand.next_player] = player;
@@ -113,10 +117,89 @@ const registerGameHandlers = (io: Server, socket: any) => {
     io.to(`house:${hand.house_id}`).emit("handUpdate", hand);
   };
 
+  /**
+   * Bury cards
+   * @param handID
+   * @param cards
+   */
+  const bury = async (handID: string, cards: CardData[]) => {
+    const hand_id = Number(handID);
+    const user_id = Number(socket.decoded.sub);
+
+    let hand = await getHand(hand_id);
+    let player = hand.players[hand.next_player];
+    const house = await getHouse(hand.house_id);
+
+    // Verify it's the correct phase
+    if (hand.phase !== HandPhases.BURY) {
+      socket.emit("error", {
+        success: false,
+        message: "Invalid phase",
+      });
+      return;
+    }
+
+    // Verify it's the player's turn
+    if (player.user_id !== user_id) {
+      socket.emit("error", {
+        success: false,
+        message: "Not your turn",
+      });
+      return;
+    }
+
+    // Verify the cards are in the player's hand
+    for (const card of cards) {
+      if (!player.hand!.includes(card)) {
+        socket.emit("error", {
+          success: false,
+          message: "Invalid card",
+        });
+        return;
+      }
+    }
+
+    // Verify the correct number of cards are being buried
+    if (cards.length !== 2) {
+      // TODO: extract to a switch, not all gamemodes have 2
+      socket.emit("error", {
+        success: false,
+        message: "Invalid number of cards",
+      });
+      return;
+    }
+
+    // Bury the cards
+    player.hand = player.hand!.filter((card) => !cards.includes(card));
+    hand.buried = hand.buried!.concat(cards);
+
+    // Look to the next phase
+    const nextPhase = getNextPhase(house.gamemode, hand.phase);
+    if (nextPhase === HandPhases.CALL) {
+      player.hand = setCallableCards(player.hand, hand.buried);
+      hand.phase = HandPhases.CALL;
+      // it remains this player's turn
+    } else if (nextPhase === HandPhases.PLAY) {
+      // TODO: set playable cards for first player
+      // TODO: bundle the relevant info for each player?
+      hand.phase = HandPhases.PLAY;
+      hand.next_player = 0;
+    }
+
+    hand.players[hand.next_player] = player;
+
+    // Store the updates
+    await updateHand(hand);
+
+    // Send the update to all players // TODO: only send necessary bits
+    io.to(`house:${hand.house_id}`).emit("handUpdate", hand);
+  };
+
   socket.on("playerMove", playerMove);
   socket.on("joinHouse", joinHouse);
   socket.on("startHand", startHand);
   socket.on("pickOrPass", pickOrPass);
+  socket.on("bury", bury);
 };
 
 export default registerGameHandlers;
