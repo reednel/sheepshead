@@ -1,12 +1,20 @@
-import { gamemodes, user_groups } from "@prisma/client";
+import {
+  blitzes,
+  cracks,
+  gamemodes,
+  nopick_modes,
+  user_groups,
+} from "@prisma/client";
 
 export interface HouseData {
   house_id: number;
   host_id: number;
   gamemode: gamemodes;
   player_count: number;
-  leaster_legal: boolean | null;
-  double: boolean;
+  nopick_mode: nopick_modes | null;
+  automatic_double: boolean;
+  blitz_legal: boolean;
+  crack_legal: boolean;
   chat_enabled: boolean;
   players_permitted: user_groups;
   spectators_permitted: user_groups;
@@ -21,7 +29,9 @@ export interface HandData {
   blind: CardData[] | null;
   buried: CardData[] | null;
   tricks: TrickData[];
-  leaster: boolean | null;
+  nopick: boolean | null;
+  blitz: blitzes | null;
+  crack: cracks | null;
   called_ace: CardData | null;
   opposition_win: boolean | null;
   winning_score: number | null;

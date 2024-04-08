@@ -64,7 +64,7 @@ const registerGameHandlers = (io: Server, socket: any) => {
     let player = hand.players[hand.next_player];
     const house = await getHouse(hand.house_id);
     const playerCount = house.player_count;
-    const leasterLegal = house.leaster_legal;
+    const nopick_mode = house.nopick_mode;
 
     // Verify it's the correct phase
     if (hand.phase !== HandPhases.POP) {
@@ -98,9 +98,10 @@ const registerGameHandlers = (io: Server, socket: any) => {
       hand.players[hand.next_player] = player;
       hand.next_player = hand.next_player + 1;
 
+      // TODO: make a switch for all the nopick modes
       if (hand.next_player >= playerCount) {
-        if (leasterLegal) {
-          hand.leaster = true;
+        if (nopick_mode) {
+          hand.nopick = true;
           hand.phase = HandPhases.PLAY;
           hand.next_player = 0;
         } else {

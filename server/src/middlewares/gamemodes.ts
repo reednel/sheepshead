@@ -8,25 +8,27 @@ import {
 } from "../types/redis.types";
 
 // enum gamemodes {
-//     G_2H_4P // 2 handed, 4 pairs down each, 8 each hand
-//     G_2H_6P // 2 handed, 6 pairs down each, 4 each hand
-//     G_3H_10E // 3 handed, 10 each, 2 blind, picker alone
-//     G_4H_8E_BQP // 4 handed, 8 each, black queens partners, double on the bump
-//     G_4H_8E_QJP // 4 handed, 8 each, queens jack partners
-//     G_4H_8E_FQP // 4 handed, 8 each, first 2 queens partners, double on the bump
-//     G_4H_7E_2B_CA // 4 handed, 7 each, 2 blind, called ace, black 7s removed, double on the bump
-//     G_4H_7E_4B_PA // 4 handed, 7 each, 4 blind, picker alone
-//     G_5H_CA // 5 handed, 6 each, 2 blind, called ace
-//     G_5H_JD // 5 handed, 6 each, 2 blind, jack of diamonds partner
-//     G_6H_5E_DS // 6 handed, G_5H_CA, dealer sits
-//     G_6H_5E_JC // 6 handed, 5 each, 4 blind jack of clubs partner
-//     G_7H_4E_JD // 7 handed, 4 each, 4 blind, jack of diamonds partner
-//     G_7H_4E_2P // 7 handed, 4 each, 4 blind, jack of diamonds and random partner
-//     G_7H_4E_LP // 7 handed, 4 each, 4 blind, left of picker is partner
-//     G_7H_DS // 7 handed, G_5H_CA, dealer and left of dealer sit
-//     G_8H_4E_BQP // 8 handed, 4 each, black queens partners
-//     G_8H_4E_FQP // 8 handed, 4 each, first two queens partners, 7 of diamonds highest trump
-//   }
+//   G_2H_4P // 2 handed, 4 pairs down each, 8 each hand
+//   G_2H_6P // 2 handed, 6 pairs down each, 4 each hand
+//   G_3H_10E // 3 handed, 10 each, 2 blind, picker alone
+//   G_4H_8E_BQ // 4 handed, 8 each, black queens partners, double on the bump
+//   G_4H_8E_Q7 // 4 handed, 8 each, QC 7D partners
+//   G_4H_8E_FQ // 4 handed, 8 each, first 2 queens partners, double on the bump
+//   G_4H_7E_2B_CA // 4 handed, 7 each, 2 blind, called ace, black 7s removed, double on the bump
+//   G_4H_7E_4B_PA // 4 handed, 7 each, 4 blind, picker alone
+//   G_5H_CA // 5 handed, 6 each, 2 blind, called ace
+//   G_5H_JD // 5 handed, 6 each, 2 blind, jack of diamonds partner
+//   G_5H_QJ // 5 handed, 6 each, black 7s removed, QS JC partners
+//   G_5H_FT // 5 handed, 6 each, 2 blind, first trick is partner
+//   G_6H_5E_DS // 6 handed, G_5H_CA, dealer sits
+//   G_6H_5E_JC // 6 handed, 5 each, 4 blind jack of clubs partner
+//   G_7H_4E_JD // 7 handed, 4 each, 4 blind, jack of diamonds partner
+//   G_7H_4E_2P // 7 handed, 4 each, 4 blind, jack of diamonds and random partner
+//   G_7H_4E_LP // 7 handed, 4 each, 4 blind, left of picker is partner
+//   G_7H_DS // 7 handed, G_5H_CA, dealer and left of dealer sit
+//   G_8H_4E_BQ // 8 handed, 4 each, black queens partners
+//   G_8H_4E_FQ // 8 handed, 4 each, first two cleans partners, 7 of diamonds highest trump
+// }
 
 export function initHand(house: HouseData, deck: CardData[]): HandData {
   try {
@@ -37,12 +39,12 @@ export function initHand(house: HouseData, deck: CardData[]): HandData {
       //   return await init2H6P(house, deck);
       // case "G_3H_10E":
       //   return await init3H10E(house, deck);
-      // case "G_4H_8E_BQP":
-      //   return await init4H8E_BQP(house, deck);
-      // case "G_4H_8E_QJP":
-      //   return await init4H8E_QJP(house, deck);
+      // case "G_4H_8E_BQ":
+      //   return await init4H8E_BQ(house, deck);
+      // case "G_4H_8E_QJ":
+      //   return await init4H8E_QJ(house, deck);
       // case "G_4H_8E_FQP":
-      //   return await init4H8E_FQP(house, deck);
+      //   return await init4H8E_FQ(house, deck);
       // case "G_4H_7E_2B_CA":
       //   return await init4H7E_2B_CA(house, deck);
       // case "G_4H_7E_4B_PA":
@@ -51,6 +53,10 @@ export function initHand(house: HouseData, deck: CardData[]): HandData {
         return init5H_CA(house, deck);
       // case "G_5H_JD":
       //   return await init5H_JD(house, deck);
+      // case "G_5H_QJ":
+      //   return await init5H_QJ(house, deck);
+      // case "G_5H_FT":
+      //   return await init5H_FT(house, deck);
       // case "G_6H_5E_DS":
       //   return await init6H5E_DS(house, deck);
       // case "G_6H_5E_JC":
@@ -63,8 +69,8 @@ export function initHand(house: HouseData, deck: CardData[]): HandData {
       //   return await init7H4E_LP(house, deck);
       // case "G_7H_DS":
       //   return await init7H_DS(house, deck);
-      // case "G_8H_4E_BQP":
-      //   return await init8H4E_BQP(house, deck);
+      // case "G_8H_4E_BQ":
+      //   return await init8H4E_BQ(house, deck);
       // case "G_8H_4E_FQP":
       //   return await init8H4E_FQP(house, deck);
       default:
@@ -88,12 +94,12 @@ export function getNextPhase(
       //   return getNextPhase2H6P(currentPhase);
       // case "G_3H_10E":
       //   return getNextPhase3H10E(currentPhase);
-      // case "G_4H_8E_BQP":
-      //   return getNextPhase4H8E_BQP(currentPhase);
-      // case "G_4H_8E_QJP":
-      //   return getNextPhase4H8E_QJP(currentPhase);
-      // case "G_4H_8E_FQP":
-      //   return getNextPhase4H8E_FQP(currentPhase);
+      // case "G_4H_8E_BQ":
+      //   return getNextPhase4H8E_BQ(currentPhase);
+      // case "G_4H_8E_QJ":
+      //   return getNextPhase4H8E_QJ(currentPhase);
+      // case "G_4H_8E_FQ":
+      //   return getNextPhase4H8E_FQ(currentPhase);
       // case "G_4H_7E_2B_CA":
       //   return getNextPhase4H7E_2B_CA(currentPhase);
       // case "G_4H_7E_4B_PA":
@@ -102,6 +108,10 @@ export function getNextPhase(
         return getNextPhase5H_CA(currentPhase);
       // case "G_5H_JD":
       //   return getNextPhase5H_JD(currentPhase);
+      // case "G_5H_QJ":
+      //   return getNextPhase5H_QJ(currentPhase);
+      // case "G_5H_FT":
+      //   return getNextPhase5H_FT(currentPhase);
       // case "G_6H_5E_DS":
       //   return getNextPhase6H5E_DS(currentPhase);
       // case "G_6H_5E_JC":
@@ -114,9 +124,9 @@ export function getNextPhase(
       //   return getNextPhase7H4E_LP(currentPhase);
       // case "G_7H_DS":
       //   return getNextPhase7H_DS(currentPhase);
-      // case "G_8H_4E_BQP":
-      //   return getNextPhase8H4E_BQP(currentPhase);
-      // case "G_8H_4E_FQP":
+      // case "G_8H_4E_BQ":
+      //   return getNextPhase8H4E_BQ(currentPhase);
+      // case "G_8H_4E_FQ":
       //   return getNextPhase8H4E_FQP(currentPhase);
       default:
         throw new Error("Invalid gamemode");
@@ -127,12 +137,94 @@ export function getNextPhase(
   }
 }
 
+/**
+ * Identifies which cards in the given hand may be chosen as fail to call an ace for.
+ * Updates the `playable` property of each card in the hand.
+ * @param {CardData[]} hand
+ * @param {CardData[]} blind
+ * @returns {CardData[]}
+ * @throws {Error} Throws an error for database issues, invalid input, etc.
+ */
 export function setCallableCards(
   hand: CardData[],
   blind: CardData[]
 ): CardData[] {
   try {
-    // TODO: Implement setCallableCards
+    // Call an unposessed ace of a posessed fail
+    for (let i = 0; i < hand.length; i++) {
+      // if the card is trump
+      if (hand[i].suit === "T") {
+        hand[i].playable = false;
+        continue;
+      }
+      // if the card is an ace
+      if (hand[i].power === 6) {
+        hand[i].playable = false;
+        continue;
+      }
+      // if we posess the ace of this suit
+      if (hand.some((card) => card.suit === hand[i].suit && card.power === 6)) {
+        hand[i].playable = false;
+        continue;
+      }
+      if (
+        blind.some((card) => card.suit === hand[i].suit && card.power === 6)
+      ) {
+        hand[i].playable = false;
+        continue;
+      }
+      hand[i].playable = true;
+    }
+    // If no cards are playable, call an unknown ace
+    if (!hand.some((card) => card.playable)) {
+      for (let i = 0; i < hand.length; i++) {
+        // if the card is an ace
+        if (hand[i].power === 6) {
+          hand[i].playable = false;
+          continue;
+        }
+        // if we posess the ace of this suit
+        if (
+          hand.some((card) => card.suit === hand[i].suit && card.power === 6)
+        ) {
+          hand[i].playable = false;
+          continue;
+        }
+        if (
+          blind.some((card) => card.suit === hand[i].suit && card.power === 6)
+        ) {
+          hand[i].playable = false;
+          continue;
+        }
+        hand[i].playable = true;
+        // TODO: specify we're calling an unknown ace
+      }
+    }
+    // If no cards are playable, call a 10
+    if (!hand.some((card) => card.playable)) {
+      for (let i = 0; i < hand.length; i++) {
+        // if the card is a 10
+        if (hand[i].power === 5) {
+          hand[i].playable = false;
+          continue;
+        }
+        // if we posess the 10 of this suit
+        if (
+          hand.some((card) => card.suit === hand[i].suit && card.power === 5)
+        ) {
+          hand[i].playable = false;
+          continue;
+        }
+        if (
+          blind.some((card) => card.suit === hand[i].suit && card.power === 5)
+        ) {
+          hand[i].playable = false;
+          continue;
+        }
+        hand[i].playable = true;
+      }
+    }
+
     return hand;
   } catch (error) {
     console.error("Error in setCallableCards:", error);
@@ -166,7 +258,9 @@ function init5H_CA(house: HouseData, newDeck: CardData[]): HandData {
     blind: blind,
     buried: [],
     tricks: [],
-    leaster: null,
+    nopick: null,
+    blitz: null,
+    crack: null,
     called_ace: null,
     opposition_win: null,
     winning_score: null,

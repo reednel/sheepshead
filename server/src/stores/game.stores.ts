@@ -1,3 +1,4 @@
+import { cards } from "@prisma/client";
 import { prisma } from "../setups/prisma";
 import { redisClient } from "../setups/redis";
 import {
@@ -22,8 +23,10 @@ export async function createHouseRecord(house: HouseData) {
         host_id: house.host_id,
         gamemode: house.gamemode,
         player_count: house.player_count,
-        leaster_legal: house.leaster_legal,
-        double: house.double,
+        nopick_mode: house.nopick_mode,
+        automatic_double: house.automatic_double,
+        blitz_legal: house.blitz_legal,
+        crack_legal: house.crack_legal,
         chat_enabled: house.chat_enabled,
         players_permitted: house.players_permitted,
         spectators_permitted: house.spectators_permitted,
@@ -142,7 +145,7 @@ export async function getDeck(): Promise<CardData[]> {
     }
 
     const deck = await prisma.cards.findMany();
-    const playableDeck: CardData[] = deck.map((card) => ({
+    const playableDeck: CardData[] = deck.map((card: cards) => ({
       card_id: card.card_id,
       suit: card.suit,
       power: card.power,

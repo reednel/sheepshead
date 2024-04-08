@@ -42,16 +42,18 @@ model friends {
 }
 
 model houses {
-  house_id             Int         @id @default(autoincrement())
+  house_id             Int           @id @default(autoincrement())
   host_id              Int
   gamemode             gamemodes
-  player_count         Int         @db.SmallInt // CHANGE?
-  leaster_legal        Boolean?
-  double               Boolean? // CHANGE
-  chat_enabled         Boolean     @default(true)
-  players_permitted    user_groups @default(EVERYONE)
-  spectators_permitted user_groups @default(EVERYONE)
-  datetime_created     DateTime    @default(now()) @db.Timestamp(6)
+  player_count         Int           @db.SmallInt // CHANGE?
+  nopick_mode          nopick_modes?
+  automatic_double     Boolean       @default(true)
+  blitz_legal          Boolean       @default(true)
+  crack_legal          Boolean       @default(true)
+  chat_enabled         Boolean       @default(true)
+  players_permitted    user_groups   @default(EVERYONE)
+  spectators_permitted user_groups   @default(EVERYONE)
+  datetime_created     DateTime      @default(now()) @db.Timestamp(6)
 
   users users   @relation(fields: [host_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
   hands hands[]
@@ -60,7 +62,9 @@ model houses {
 model hands {
   hand_id          Int      @id @default(autoincrement())
   house_id         Int
-  leaster          Boolean?
+  nopick           Boolean?
+  blitz            blitzes?
+  crack            cracks?
   called_ace       String?  @db.Char(2)
   opposition_win   Boolean
   winning_score    Int      @db.SmallInt
@@ -190,23 +194,43 @@ enum player_roles {
   OPPOSITION
 }
 
+enum nopick_modes {
+  LEASTER
+  MOSTER
+  MITTLER
+  DOUBLER
+  SCHWANZER
+}
+
+enum blitzes {
+  BLACK_BLITZ
+  RED_BLITZ
+}
+
+enum cracks {
+  CRACK
+  RECRACK
+}
+
 enum gamemodes {
   G_2H_4P // 2 handed, 4 pairs down each, 8 each hand
   G_2H_6P // 2 handed, 6 pairs down each, 4 each hand
   G_3H_10E // 3 handed, 10 each, 2 blind, picker alone
-  G_4H_8E_BQP // 4 handed, 8 each, black queens partners, double on the bump
-  G_4H_8E_QJP // 4 handed, 8 each, queens jack partners
-  G_4H_8E_FQP // 4 handed, 8 each, first 2 queens partners, double on the bump
+  G_4H_8E_BQ // 4 handed, 8 each, black queens partners, double on the bump
+  G_4H_8E_Q7 // 4 handed, 8 each, QC 7D partners
+  G_4H_8E_FQ // 4 handed, 8 each, first 2 queens partners, double on the bump
   G_4H_7E_2B_CA // 4 handed, 7 each, 2 blind, called ace, black 7s removed, double on the bump
   G_4H_7E_4B_PA // 4 handed, 7 each, 4 blind, picker alone
   G_5H_CA // 5 handed, 6 each, 2 blind, called ace
   G_5H_JD // 5 handed, 6 each, 2 blind, jack of diamonds partner
+  G_5H_QJ // 5 handed, 6 each, black 7s removed, QS JC partners
+  G_5H_FT // 5 handed, 6 each, 2 blind, first trick is partner
   G_6H_5E_DS // 6 handed, G_5H_CA, dealer sits
   G_6H_5E_JC // 6 handed, 5 each, 4 blind jack of clubs partner
   G_7H_4E_JD // 7 handed, 4 each, 4 blind, jack of diamonds partner
   G_7H_4E_2P // 7 handed, 4 each, 4 blind, jack of diamonds and random partner
   G_7H_4E_LP // 7 handed, 4 each, 4 blind, left of picker is partner
   G_7H_DS // 7 handed, G_5H_CA, dealer and left of dealer sit
-  G_8H_4E_BQP // 8 handed, 4 each, black queens partners
-  G_8H_4E_FQP // 8 handed, 4 each, first two cleans partners, 7 of diamonds highest trump
+  G_8H_4E_BQ // 8 handed, 4 each, black queens partners
+  G_8H_4E_FQ // 8 handed, 4 each, first two cleans partners, 7 of diamonds highest trump
 }
