@@ -6,6 +6,7 @@ import {
   PlayerData,
   CardData,
   CallTypes,
+  PlayerRoles,
 } from "../types/redis.types";
 
 // enum gamemodes {
@@ -239,6 +240,36 @@ export function setCallableCards(
     return [hand, CallTypes.GOING_ALONE];
   } catch (error) {
     console.error("Error in setCallableCards:", error);
+    throw new Error("Internal Server Error");
+  }
+}
+
+/**
+ * Identifies which cards in the given hand may be played in the current trick.
+ * Updates the `playable` property of each card in the hand.
+ * @param {CardData[]} hand
+ * @param {CardData} leadCard
+ * @param {PlayerRoles} playerRole
+ * @returns {CardData[]}
+ * @throws {Error} Throws an error for database issues, invalid input, etc.
+ */
+export function setPlayableCards(
+  hand: CardData[],
+  leadCard: CardData | null,
+  playerRole: PlayerRoles
+): CardData[] {
+  try {
+    if (leadCard === null) {
+      // It's the lead, all cards are playable
+      for (let i = 0; i < hand.length; i++) {
+        hand[i].playable = true;
+      }
+      return hand;
+    }
+
+    return hand;
+  } catch (error) {
+    console.error("Error in setPlayableCards:", error);
     throw new Error("Internal Server Error");
   }
 }
