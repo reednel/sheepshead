@@ -140,7 +140,7 @@ export function getNextPhase(
 
 /**
  * Identifies which cards in the given hand may be chosen as fail to call an ace for.
- * Updates the `playable` property of each card in the hand.
+ * Updates the `playable` property of each card in the hand, and which type of call is being made.
  * @param {CardData[]} hand
  * @param {CardData[]} blind
  * @returns {[CardData[], CallTypes]}
@@ -151,8 +151,7 @@ export function setCallableCards(
   blind: CardData[]
 ): [CardData[], CallTypes] {
   try {
-    let callType: CallTypes;
-    // Call an unposessed ace of a posessed fail
+    // Call an ace
     for (let i = 0; i < hand.length; i++) {
       if (hand[i].suit === "T") {
         // the card is trump
@@ -176,65 +175,68 @@ export function setCallableCards(
       }
     }
 
+    // If there are any callable cards, return
     if (hand.some((card) => card.playable)) {
-      callType = CallTypes.CALLED_ACE;
-      return [hand, callType];
+      return [hand, CallTypes.CALLED_ACE];
     }
 
     // No cards are playable, call an unknown ace
     for (let i = 0; i < hand.length; i++) {
-      // if the card is an ace
       if (hand[i].power === 6) {
+        // the card is an ace
         hand[i].playable = false;
-        continue;
-      }
-      // if we posess the ace of this suit
-      if (hand.some((card) => card.suit === hand[i].suit && card.power === 6)) {
+      } else if (
+        hand.some((card) => card.suit === hand[i].suit && card.power === 6)
+      ) {
+        // the ace of this suit is in this hand
         hand[i].playable = false;
-        continue;
-      }
-      if (
+      } else if (
         blind.some((card) => card.suit === hand[i].suit && card.power === 6)
       ) {
+        // the ace of this suit is in the blind
         hand[i].playable = false;
-        continue;
+      } else {
+        // the card is callable
+        hand[i].playable = true;
       }
-      hand[i].playable = true;
     }
 
+    // If there are any callable cards, return
     if (hand.some((card) => card.playable)) {
-      callType = CallTypes.UNKNOWN_ACE;
-      return [hand, callType];
+      return [hand, CallTypes.UNKNOWN_ACE];
     }
 
-    // No cards are playable, call a 10
+    // Call a 10
     for (let i = 0; i < hand.length; i++) {
-      // if the card is a 10
-      if (hand[i].power === 5) {
+      if (hand[i].suit === "T") {
+        // the card is trump
         hand[i].playable = false;
-        continue;
-      }
-      // if we posess the 10 of this suit
-      if (hand.some((card) => card.suit === hand[i].suit && card.power === 5)) {
+      } else if (hand[i].power === 5) {
+        // the card is a 10
         hand[i].playable = false;
-        continue;
-      }
-      if (
+      } else if (
+        hand.some((card) => card.suit === hand[i].suit && card.power === 5)
+      ) {
+        // the 10 of this suit is in this hand
+        hand[i].playable = false;
+      } else if (
         blind.some((card) => card.suit === hand[i].suit && card.power === 5)
       ) {
+        // the 10 of this suit is in the blind
         hand[i].playable = false;
-        continue;
+      } else {
+        // the card is callable
+        hand[i].playable = true;
       }
-      hand[i].playable = true;
     }
 
+    // If there are any callable cards, return
     if (hand.some((card) => card.playable)) {
-      callType = CallTypes.CALLED_TEN;
-      return [hand, callType];
+      return [hand, CallTypes.CALLED_TEN];
     }
 
-    callType = CallTypes.GOING_ALONE;
-    return [hand, callType];
+    // Call going alone
+    return [hand, CallTypes.GOING_ALONE];
   } catch (error) {
     console.error("Error in setCallableCards:", error);
     throw new Error("Internal Server Error");
