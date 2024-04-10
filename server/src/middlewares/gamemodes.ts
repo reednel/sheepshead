@@ -5,6 +5,7 @@ import {
   HouseData,
   PlayerData,
   CardData,
+  CallTypes,
 } from "../types/redis.types";
 
 // enum gamemodes {
@@ -142,21 +143,46 @@ export function getNextPhase(
  * Updates the `playable` property of each card in the hand.
  * @param {CardData[]} hand
  * @param {CardData[]} blind
- * @returns {CardData[]}
+ * @returns {[CardData[], CallTypes]}
  * @throws {Error} Throws an error for database issues, invalid input, etc.
  */
 export function setCallableCards(
   hand: CardData[],
   blind: CardData[]
-): CardData[] {
+): [CardData[], CallTypes] {
   try {
+    let callType: CallTypes;
     // Call an unposessed ace of a posessed fail
     for (let i = 0; i < hand.length; i++) {
-      // if the card is trump
       if (hand[i].suit === "T") {
+        // the card is trump
         hand[i].playable = false;
-        continue;
+      } else if (hand[i].power === 6) {
+        // the card is an ace
+        hand[i].playable = false;
+      } else if (
+        hand.some((card) => card.suit === hand[i].suit && card.power === 6)
+      ) {
+        // the ace of this suit is in this hand
+        hand[i].playable = false;
+      } else if (
+        blind.some((card) => card.suit === hand[i].suit && card.power === 6)
+      ) {
+        // the ace of this suit is in the blind
+        hand[i].playable = false;
+      } else {
+        // the card is callable
+        hand[i].playable = true;
       }
+    }
+
+    if (hand.some((card) => card.playable)) {
+      callType = CallTypes.CALLED_ACE;
+      return [hand, callType];
+    }
+
+    // No cards are playable, call an unknown ace
+    for (let i = 0; i < hand.length; i++) {
       // if the card is an ace
       if (hand[i].power === 6) {
         hand[i].playable = false;
@@ -175,57 +201,40 @@ export function setCallableCards(
       }
       hand[i].playable = true;
     }
-    // If no cards are playable, call an unknown ace
-    if (!hand.some((card) => card.playable)) {
-      for (let i = 0; i < hand.length; i++) {
-        // if the card is an ace
-        if (hand[i].power === 6) {
-          hand[i].playable = false;
-          continue;
-        }
-        // if we posess the ace of this suit
-        if (
-          hand.some((card) => card.suit === hand[i].suit && card.power === 6)
-        ) {
-          hand[i].playable = false;
-          continue;
-        }
-        if (
-          blind.some((card) => card.suit === hand[i].suit && card.power === 6)
-        ) {
-          hand[i].playable = false;
-          continue;
-        }
-        hand[i].playable = true;
-        // TODO: specify we're calling an unknown ace
-      }
-    }
-    // If no cards are playable, call a 10
-    if (!hand.some((card) => card.playable)) {
-      for (let i = 0; i < hand.length; i++) {
-        // if the card is a 10
-        if (hand[i].power === 5) {
-          hand[i].playable = false;
-          continue;
-        }
-        // if we posess the 10 of this suit
-        if (
-          hand.some((card) => card.suit === hand[i].suit && card.power === 5)
-        ) {
-          hand[i].playable = false;
-          continue;
-        }
-        if (
-          blind.some((card) => card.suit === hand[i].suit && card.power === 5)
-        ) {
-          hand[i].playable = false;
-          continue;
-        }
-        hand[i].playable = true;
-      }
+
+    if (hand.some((card) => card.playable)) {
+      callType = CallTypes.UNKNOWN_ACE;
+      return [hand, callType];
     }
 
-    return hand;
+    // No cards are playable, call a 10
+    for (let i = 0; i < hand.length; i++) {
+      // if the card is a 10
+      if (hand[i].power === 5) {
+        hand[i].playable = false;
+        continue;
+      }
+      // if we posess the 10 of this suit
+      if (hand.some((card) => card.suit === hand[i].suit && card.power === 5)) {
+        hand[i].playable = false;
+        continue;
+      }
+      if (
+        blind.some((card) => card.suit === hand[i].suit && card.power === 5)
+      ) {
+        hand[i].playable = false;
+        continue;
+      }
+      hand[i].playable = true;
+    }
+
+    if (hand.some((card) => card.playable)) {
+      callType = CallTypes.CALLED_TEN;
+      return [hand, callType];
+    }
+
+    callType = CallTypes.GOING_ALONE;
+    return [hand, callType];
   } catch (error) {
     console.error("Error in setCallableCards:", error);
     throw new Error("Internal Server Error");
@@ -261,7 +270,8 @@ function init5H_CA(house: HouseData, newDeck: CardData[]): HandData {
     nopick: null,
     blitz: null,
     crack: null,
-    called_ace: null,
+    call_type: null,
+    called_card: null,
     opposition_win: null,
     winning_score: null,
     phase: HandPhases.POP,

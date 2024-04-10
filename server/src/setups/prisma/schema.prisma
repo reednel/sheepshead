@@ -60,18 +60,19 @@ model houses {
 }
 
 model hands {
-  hand_id          Int      @id @default(autoincrement())
+  hand_id          Int         @id @default(autoincrement())
   house_id         Int
   nopick           Boolean?
   blitz            blitzes?
   crack            cracks?
-  called_ace       String?  @db.Char(2)
+  call_type        call_types?
+  called_card      String?     @db.Char(2)
   opposition_win   Boolean
-  winning_score    Int      @db.SmallInt
-  datetime_created DateTime @default(now()) @db.Timestamp(6)
+  winning_score    Int         @db.SmallInt
+  datetime_created DateTime    @default(now()) @db.Timestamp(6)
 
   houses  houses    @relation(fields: [house_id], references: [house_id], onDelete: NoAction, onUpdate: NoAction)
-  cards   cards?    @relation(fields: [called_ace], references: [card_id], onDelete: NoAction, onUpdate: NoAction)
+  cards   cards?    @relation(fields: [called_card], references: [card_id], onDelete: NoAction, onUpdate: NoAction)
   players players[]
   tricks  tricks[]
   blinds  blinds[]
@@ -210,6 +211,13 @@ enum blitzes {
 enum cracks {
   CRACK
   RECRACK
+}
+
+enum call_types {
+  CALLED_ACE
+  UNKNOWN_ACE
+  CALLED_TEN
+  GOING_ALONE
 }
 
 enum gamemodes {

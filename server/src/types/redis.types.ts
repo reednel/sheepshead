@@ -32,7 +32,8 @@ export interface HandData {
   nopick: boolean | null;
   blitz: blitzes | null;
   crack: cracks | null;
-  called_ace: CardData | null;
+  call_type: CallTypes | null;
+  called_card: CardData | null;
   opposition_win: boolean | null;
   winning_score: number | null;
   phase: HandPhases;
@@ -79,4 +80,11 @@ export const enum HandPhases {
   BURY = "BURY",
   CALL = "CALL",
   PLAY = "PLAY",
+}
+
+export const enum CallTypes {
+  CALLED_ACE = "CALLED_ACE",
+  UNKNOWN_ACE = "UNKNOWN_ACE",
+  CALLED_TEN = "CALLED_TEN",
+  GOING_ALONE = "GOING_ALONE",
 }

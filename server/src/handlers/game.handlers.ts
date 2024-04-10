@@ -177,7 +177,10 @@ const registerGameHandlers = (io: Server, socket: any) => {
     // Look to the next phase
     const nextPhase = getNextPhase(house.gamemode, hand.phase);
     if (nextPhase === HandPhases.CALL) {
-      player.hand = setCallableCards(player.hand, hand.buried);
+      [player.hand, hand.call_type] = setCallableCards(
+        player.hand,
+        hand.buried
+      );
       hand.phase = HandPhases.CALL;
       // it remains this player's turn
     } else if (nextPhase === HandPhases.PLAY) {
