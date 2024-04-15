@@ -256,7 +256,9 @@ export function setCallableCards(
 export function setPlayableCards(
   hand: CardData[],
   leadCard: CardData | null,
-  playerRole: PlayerRoles
+  playerRole: PlayerRoles,
+  calledCard: CardData | null,
+  calledCardPlayed: boolean | null
 ): CardData[] {
   try {
     if (leadCard === null) {
@@ -265,6 +267,48 @@ export function setPlayableCards(
         hand[i].playable = true;
       }
       return hand;
+    }
+
+    if (!calledCardPlayed) {
+      // The called card has not been played yet
+      if (playerRole === PlayerRoles.PICKER) {
+        // This is the partner's play
+        if (leadCard.suit === calledCard.suit) {
+          // The lead card is the same suit as the called card
+          for (let i = 0; i < hand.length; i++) {
+            // Only something of the same suit is playable
+            if (hand[i].suit === calledCard.suit) {
+              hand[i].playable = true;
+            } else {
+              hand[i].playable = false;
+            }
+          }
+          return hand;
+        }
+      } else if (playerRole === PlayerRoles.PARTNER) {
+        // This is the picker's play
+        if (leadCard.suit === calledCard.suit) {
+          // The lead card is the same suit as the called card
+          for (let i = 0; i < hand.length; i++) {
+            // Only the called card is playable
+            if (hand[i].card_id === calledCard.card_id) {
+              hand[i].playable = true;
+            } else {
+              hand[i].playable = false;
+            }
+          }
+          return hand;
+        }
+      }
+    }
+
+    
+
+    for (let i = 0; i < hand.length; i++) {
+      if (hand[i].suit === leadCard.suit) {
+        // The card is the same suit as the lead card
+        hand[i].playable = true;
+      } 
     }
 
     return hand;
